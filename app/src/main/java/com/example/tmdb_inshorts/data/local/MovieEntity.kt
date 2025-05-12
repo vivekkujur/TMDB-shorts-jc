@@ -9,34 +9,38 @@ data class MovieEntity(
     @PrimaryKey
     val id: Int,
     val title: String,
-    val posterPath: String?,
-    val backdropPath: String?,
+    val overview: String,
+    val posterPath: String,
     val releaseDate: String,
     val voteAverage: Double,
-    val overview: String
+    val isBookmarked: Boolean = false,
+    val backdropPath: String,
+
+
 ) {
     fun toMovie(): Movie {
         return Movie(
             id = id,
             title = title,
+            overview = overview,
             posterPath = posterPath,
-            backdropPath = backdropPath,
             releaseDate = releaseDate,
             voteAverage = voteAverage,
-            overview = overview
+            backdropPath = backdropPath
         )
     }
 
     companion object {
-        fun fromMovie(movie: Movie): MovieEntity {
+        fun fromMovie(movie: Movie, isBookmarked: Boolean = false): MovieEntity {
             return MovieEntity(
                 id = movie.id,
                 title = movie.title,
-                posterPath = movie.posterPath,
-                backdropPath = movie.backdropPath,
+                overview = movie.overview,
+                posterPath = movie.posterPath?:"",
                 releaseDate = movie.releaseDate,
                 voteAverage = movie.voteAverage,
-                overview = movie.overview
+                isBookmarked = isBookmarked,
+                backdropPath= movie.backdropPath?:""
             )
         }
     }

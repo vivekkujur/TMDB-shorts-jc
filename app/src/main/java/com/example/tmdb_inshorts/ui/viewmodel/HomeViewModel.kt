@@ -5,9 +5,7 @@ import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.example.tmdb_inshorts.data.model.Movie
 import com.example.tmdb_inshorts.di.DependencyProvider
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.catch
+import kotlinx.coroutines.flow.*
 import kotlinx.coroutines.launch
 
 class HomeViewModel(application: Application) : AndroidViewModel(application) {
@@ -19,14 +17,14 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
     private val _searchResults = MutableStateFlow<List<Movie>>(emptyList())
     val searchResults: StateFlow<List<Movie>> = _searchResults
 
-
-    private val _movieList  = MutableStateFlow<List<Movie>>(emptyList())
-    val movieList: StateFlow<List<Movie>> = _movieList
+    private val _bookmarkedMovies = MutableStateFlow<List<Movie>>(emptyList())
+    val bookmarkedMovies: StateFlow<List<Movie>> = _bookmarkedMovies
 
     private var isSearching = false
 
     init {
         loadMovies()
+        loadBookmarkedMovies()
     }
 
     private fun loadMovies() {
@@ -40,7 +38,11 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                     ?.collect { movies ->
                         if (movies.isNotEmpty()) {
                             _uiState.value = UiState.Success(movies)
-                            _movieList.value = movies
+                        }else {
+                            val response = repository?.refreshTrendingMovies()
+                            if (response != null) {
+                                _uiState.value = UiState.Success(response.results)
+                            }
                         }
                     }
 
@@ -48,14 +50,21 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 val response = repository?.refreshTrendingMovies()
                 if (response != null) {
                     _uiState.value = UiState.Success(response.results)
-                    _movieList.value = response.results
-
                 }
             } catch (e: Exception) {
                 if (_uiState.value !is UiState.Success) {
                     _uiState.value = UiState.Error(e.message ?: "Unknown error occurred")
                 }
             }
+        }
+    }
+
+    private fun loadBookmarkedMovies() {
+        viewModelScope.launch {
+            repository?.getBookmarkedMovies()
+                ?.collect { movies ->
+                    _bookmarkedMovies.value = movies
+                }
         }
     }
 
@@ -88,6 +97,7 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
                 if (response != null) {
                     _searchResults.value = response.results
                     _uiState.value = UiState.Success(response.results)
+
                 }
 
             } catch (e: Exception) {
@@ -100,6 +110,12 @@ class HomeViewModel(application: Application) : AndroidViewModel(application) {
         isSearching = false
         _searchResults.value = emptyList()
         loadMovies()
+    }
+
+    fun toggleBookmark(movieId: Int, isBookmarked: Boolean) {
+        viewModelScope.launch {
+            repository?.toggleBookmark(movieId, isBookmarked)
+        }
     }
 
     sealed class UiState {

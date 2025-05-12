@@ -6,6 +6,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
+import androidx.compose.material.icons.outlined.FavoriteBorder
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.runtime.saveable.rememberSaveable
@@ -38,6 +39,7 @@ fun HomeScreen(
     var searchQuery by remember { mutableStateOf("") }
     val uiState by viewModel.uiState.collectAsState()
     val searchResults by viewModel.searchResults.collectAsState()
+    val bookmarkedMovies by viewModel.bookmarkedMovies.collectAsState()
     val coroutineScope = rememberCoroutineScope()
     var expanded by rememberSaveable { mutableStateOf(false) }
 
@@ -142,6 +144,10 @@ fun HomeScreen(
                             items(movies) { movie ->
                                 MovieCard(
                                     movie = movie,
+                                    isBookmarked = bookmarkedMovies.any { it.id == movie.id },
+                                    onBookmarkClick = { isBookmarked ->
+                                        viewModel.toggleBookmark(movie.id, isBookmarked)
+                                    },
                                     onClick = {
                                         navController.navigate("movie_detail/${movie.id}")
                                     }
@@ -175,6 +181,8 @@ fun HomeScreen(
 @Composable
 fun MovieCard(
     movie: Movie,
+    isBookmarked: Boolean,
+    onBookmarkClick: (Boolean) -> Unit,
     onClick: () -> Unit
 ) {
     Card(
@@ -183,42 +191,54 @@ fun MovieCard(
             .clickable(onClick = onClick),
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(120.dp)
-        ) {
-            AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current)
-                    .data("https://image.tmdb.org/t/p/w500${movie.posterPath}")
-                    .crossfade(true)
-                    .build(),
-                contentDescription = movie.title,
+        Box {
+            Row(
                 modifier = Modifier
-                    .width(80.dp)
-                    .fillMaxHeight(),
-                contentScale = ContentScale.Crop
-            )
-            Column(
-                modifier = Modifier
-                    .padding(8.dp)
-                    .weight(1f)
+                    .fillMaxWidth()
+                    .height(120.dp)
             ) {
-                Text(
-                    text = movie.title,
-                    style = MaterialTheme.typography.titleMedium,
-                    maxLines = 2,
-                    overflow = TextOverflow.Ellipsis
+                AsyncImage(
+                    model = ImageRequest.Builder(LocalContext.current)
+                        .data("https://image.tmdb.org/t/p/w500${movie.posterPath}")
+                        .crossfade(true)
+                        .build(),
+                    contentDescription = movie.title,
+                    modifier = Modifier
+                        .width(80.dp)
+                        .fillMaxHeight(),
+                    contentScale = ContentScale.Crop
                 )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = movie.releaseDate,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Spacer(modifier = Modifier.height(4.dp))
-                Text(
-                    text = "Rating: ${movie.voteAverage}",
-                    style = MaterialTheme.typography.bodyMedium
+                Column(
+                    modifier = Modifier
+                        .padding(8.dp)
+                        .weight(1f)
+                ) {
+                    Text(
+                        text = movie.title,
+                        style = MaterialTheme.typography.titleMedium,
+                        maxLines = 2,
+                        overflow = TextOverflow.Ellipsis
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = movie.releaseDate,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(
+                        text = "Rating: ${movie.voteAverage}",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+            IconButton(
+                onClick = { onBookmarkClick(!isBookmarked) },
+                modifier = Modifier.align(Alignment.TopEnd)
+            ) {
+                Icon(
+                    imageVector = if (isBookmarked) Icons.Filled.Favorite else Icons.Outlined.FavoriteBorder,
+                    contentDescription = if (isBookmarked) "Remove bookmark" else "Add bookmark",
+                    tint = if (isBookmarked) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurface
                 )
             }
         }

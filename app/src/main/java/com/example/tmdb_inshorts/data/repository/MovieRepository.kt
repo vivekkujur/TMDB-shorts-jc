@@ -20,6 +20,12 @@ class MovieRepository private constructor(
         }
     }
 
+    fun getBookmarkedMovies(): Flow<List<Movie>> {
+        return movieDao.getBookmarkedMovies().map { entities ->
+            entities.map { it.toMovie() }
+        }
+    }
+
     suspend fun refreshTrendingMovies(page: Int = 1): MovieResponse {
         val response = apiService.getTrendingMovies(API_KEY, page)
         // Cache the movies
@@ -40,6 +46,10 @@ class MovieRepository private constructor(
         val movie = apiService.getMovieDetails(movieId, API_KEY)
         movieDao.insertMovie(MovieEntity.fromMovie(movie))
         return movie
+    }
+
+    suspend fun toggleBookmark(movieId: Int, isBookmarked: Boolean) {
+        movieDao.updateBookmarkStatus(movieId, isBookmarked)
     }
 
     companion object {
