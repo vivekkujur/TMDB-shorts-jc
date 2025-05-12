@@ -78,35 +78,6 @@ fun HomeScreen(
                 .padding(paddingValues)
         ) {
             if (showSearchBar) {
-//                SearchBar(
-//                    query = searchQuery,
-//                    onQueryChange = { query ->
-//                        searchQuery = query
-//                        coroutineScope.launch {
-//                            delay(300) // Debounce search
-//                            viewModel.searchMovies(query)
-//                        }
-//                    },
-//                    onSearch = { viewModel.searchMovies(searchQuery) },
-//                    active = true,
-//                    onActiveChange = {},
-//                    leadingIcon = {
-//                        Icon(Icons.Default.Search, contentDescription = "Search")
-//                    },
-//                    trailingIcon = {
-//                        if (searchQuery.isNotEmpty()) {
-//                            IconButton(onClick = {
-//                                searchQuery = ""
-//                                viewModel.clearSearch()
-//                            }) {
-//                                Icon(Icons.Default.Clear, contentDescription = "Clear")
-//                            }
-//                        }
-//                    },
-//                    placeholder = { Text("Search movies...") },
-//                    modifier = Modifier
-//                        .height(50.dp)
-//                ) {}
 
                 SearchBar(
                     modifier = Modifier

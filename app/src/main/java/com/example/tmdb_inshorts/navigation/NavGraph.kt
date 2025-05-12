@@ -25,9 +25,7 @@ fun NavGraph(
             HomeScreen(
                 viewModel = viewModel,
                 navController = navController
-//                onMovieClick = { movie ->
-//                    navController.navigate("${Screen.MovieDetail.route}/${movie.id}")
-//                }
+
             )
         }
         
@@ -45,9 +43,6 @@ fun NavGraph(
                 navController = navController,
                 movieId = it.arguments?.getInt("movieId")!!
 
-//                onBackClick = {
-//                    navController.popBackStack()
-//                }
             )
         }
     }
