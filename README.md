@@ -43,8 +43,5 @@ In some cases, `tmdb.org` might be **blocked or filtered on certain Wi-Fi networ
 - **Room Database**
 - **Coroutines + Flow**
 - **MVVM Architecture**
-- **Hilt (optional)** for dependency injection
-
----
 
 
